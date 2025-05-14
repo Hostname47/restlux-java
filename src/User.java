@@ -2,6 +2,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import api.ApiClient;
+import api.Token;
 
 public class User {
     private String firstname;
@@ -9,8 +10,50 @@ public class User {
     private String email;
     private String token;
 
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getFullname() {
+        return firstname + " " + lastname;
+    }
+
+    public boolean preLogin() {
+        String token_ = Token.readTokenFile();
+        String response = ApiClient.get("/user", token_);
+
+        if (response != null && !response.isEmpty()) {
+            if (response.contains("\"id\"")) {
+                setToken(token_);
+                setFullname(response);
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
     public String login() {
         Scanner scanner = new Scanner(System.in);
+
+        System.out.println("-> Login:");
 
         System.out.print("Enter email or username: ");
         String login = scanner.nextLine();
@@ -26,30 +69,46 @@ public class User {
         }
 
         String response = ApiClient.post("/login", jsonPayload, "");
-
+        setFullname(response);
         // Extract token using native String methods
-        int tokenKeyIndex = response.indexOf("\"token\"");
-        if (tokenKeyIndex != -1) {
-            int colonIndex = response.indexOf(":", tokenKeyIndex);
-            int quoteStart = response.indexOf("\"", colonIndex + 1);
-            int quoteEnd = response.indexOf("\"", quoteStart + 1);
-            String extractedToken = response.substring(quoteStart + 1, quoteEnd);
+        String token_ = ApiClient.extract(response, "token");
+        if (token_ != null) {
+            setToken(token_);
 
-            setToken(extractedToken);
             // Write to ./src/token.txt
             try (FileWriter writer = new FileWriter("src/token.txt")) {
-                writer.write(extractedToken);
+                writer.write(token_);
             } catch (IOException e) {
-                System.out.println("Failed to write token: " + e.getMessage());
+
             }
 
-            return extractedToken;
+            return token_;
 
         } else {
-            System.out.println("Token not found in response.");
+
         }
 
         return null;
+    }
+
+    public void logout() {
+        try {
+            if (token == null || token.isEmpty()) {
+                System.out.println("-e> Error: 404");
+                return;
+            }
+
+            ApiClient.post("/logout", "", token);
+            setToken(null);
+            System.out.println("-- User logged out");
+            /**
+             * Please here, we don't want to remove the token from the file
+             * As we don't know to do this, because the API is responsible to
+             * invalidate the token
+             */
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getToken() {
@@ -62,5 +121,14 @@ public class User {
 
     public String getEmail() {
         return this.email;
+    }
+
+    public void setFullname(String response) {
+        String fullname = ApiClient.extract(response, "fullname");
+        if(fullname != null) {
+            String[] names = fullname.split(" ");
+            setFirstname(names[0]);
+            setLastname(names[1]);
+        }
     }
 }

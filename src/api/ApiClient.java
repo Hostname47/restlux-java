@@ -13,7 +13,6 @@ public class ApiClient {
     public static String post(String endpoint, String requestBody, String token) {
         try {
             String apiUrl = Config.getBaseApiUrl() + endpoint;
-            System.out.println(apiUrl);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(apiUrl))
@@ -50,5 +49,17 @@ public class ApiClient {
         } catch (Exception e) {
             return "Request failed: " + e.getMessage();
         }
+    }
+
+    public static String extract(String response, String key) {
+        int contentIndex = response.indexOf("\"" + key + "\"");
+        if (contentIndex != -1) {
+            int colonIndex = response.indexOf(":", contentIndex);
+            int quoteStart = response.indexOf("\"", colonIndex + 1);
+            int quoteEnd = response.indexOf("\"", quoteStart + 1);
+            return response.substring(quoteStart + 1, quoteEnd);
+        }
+
+        return null;
     }
 }
