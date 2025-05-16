@@ -1,5 +1,7 @@
 package api;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -18,7 +20,7 @@ public class ApiClient {
                     .uri(new URI(apiUrl))
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
-                    .header("Authorization", "Bearer " + token) // Add the token.txt here
+                    .header("Authorization", "Bearer " + token)
                     .POST(BodyPublishers.ofString(requestBody))
                     .build();
 
@@ -39,7 +41,7 @@ public class ApiClient {
                     .uri(new URI(apiUrl))
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
-                    .header("Authorization", "Bearer " + token) // Add the token.txt here
+                    .header("Authorization", "Bearer " + token)
                     .GET() // Use the GET method
                     .build();
 
@@ -61,5 +63,14 @@ public class ApiClient {
         }
 
         return null;
+    }
+
+    public static void storeToken(String token) {
+        // Write to ./src/token.txt
+        try (FileWriter writer = new FileWriter("src/api/token.txt")) {
+            writer.write(token);
+        } catch (IOException e) {
+
+        }
     }
 }

@@ -1,19 +1,11 @@
-import api.ApiClient;
-import api.Token;
+package core;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Evaluator {
     final private User user;
 
-    Evaluator() {
+    public Evaluator() {
         user = new User();
     }
 
@@ -34,7 +26,7 @@ public class Evaluator {
             return;
         }
 
-        int choice;
+        String choice;
         Scanner scanner = new Scanner(System.in);
 
         Output.header();
@@ -43,29 +35,39 @@ public class Evaluator {
             // Show boot menu to guide the user
             Output.boot();
 
-            choice = scanner.nextInt();
+            choice = scanner.nextLine();
             switch (choice) {
-                case 1:
+                case "1": {
                     String t = user.login();
                     if(t != null) { // If the login is done, and token is returned, redirect it to auth area
                         auth();
-                    } else {
-                        Output.clear();
-                        System.out.println("--> Invalid credentials, please try again.");
                     }
                     break;
-                case 2:
+                }
+                case "2": {
+                    String t = user.signup();
+                    if(t != null) {
+                        auth();
+                    } else {
+                        Output.clear();
+                        System.out.println("--> Something went wrong during sign up, please scroll to the top to see the error.");
+                    }
                     break;
+                }
                 default:
-                    shutdown(0);
-                    return;
-
+                    System.out.println("-- Wrong choice, try again !");
+                    Output.printInserter();
             }
 
         }
     }
 
     public void auth() {
+        if(!user.hasAtLeastOneRole()) {
+            System.out.println("--> This console app is available for admins only");
+            shutdown(403);
+        }
+
         Output.clear();
         Output.header();
         Scanner sc = new Scanner(System.in);
@@ -82,18 +84,16 @@ public class Evaluator {
                     user.logout();
                     shutdown(0);
                 default:
-                    break outer;
+                    shutdown(0);
             }
         }
-
-
     }
 
     public void shutdown(int code) {
         if(code == 0) {
             System.out.print("- -- - SEE YOU LATER - -- -");
         } else {
-            System.out.println("-- Something went wrong");
+            System.out.println("--> Something went wrong (" + code + ")");
         }
         System.exit(code);
     }

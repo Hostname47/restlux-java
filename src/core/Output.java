@@ -1,3 +1,5 @@
+package core;
+
 public class Output {
     public static void header() {
         System.out.println("-- -- --      WELCOME BACK TO     -- -- --");
@@ -16,7 +18,7 @@ public class Output {
     }
 
     public static void authBoot(User user) {
-        System.out.println("=== User: " + user.getFullname());
+        System.out.println("=== core.User: " + user.getFullname());
         System.out.println("-> 1. Product managent");
         System.out.println("-> 2. Menus management");
         System.out.println("-> 3. Categories management");
