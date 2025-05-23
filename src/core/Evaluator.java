@@ -63,10 +63,10 @@ public class Evaluator {
     }
 
     public void auth() {
-        if(!user.hasAtLeastOneRole()) {
-            System.out.println("--> This console app is available for admins only");
-            shutdown(403);
-        }
+//        if(!user.hasAtLeastOneRole()) {
+//            System.out.println("--> This console app is available for admins only");
+//            shutdown(403);
+//        }
 
         Output.clear();
         Output.header();
@@ -77,6 +77,9 @@ public class Evaluator {
             Output.authBoot(user);
             int choice = sc.nextInt();
             switch(choice) {
+                case 1:
+
+                    break;
                 case 5:
                     shutdown(0);
                     break;
